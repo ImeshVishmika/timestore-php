@@ -269,8 +269,7 @@ function paynow() {
     request.onreadystatechange = function () {
         if (request.readyState == 4 && request.status == 200) {
 
-            console.log(jsonObject);
-            
+            console.log(JSON.parse(request.responseText));
             var jsonObject = JSON.parse(request.responseText);
          
 
