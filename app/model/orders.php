@@ -62,7 +62,7 @@ class orders
                     Database::iud("INSERT INTO `order_has_model`(`order_id`,`model_id`,`qty`) VALUE($order_id,$model_id,$qty)");
                     Database::iud("INSERT INTO `invoice`(`invoice_id`,`order_id`,`email`,`delivery_fee`) VALUES($invoice_id,$order_id , '" . $email . "',$deliver_fee) ");
                     Database::iud("INSERT INTO `invoice_items`(`invoice_id`,`order_id`,`product_id`,`product_name`,`product_price`,`model_id`,`model_name`,`qty`) 
-                    VALUE($invoice_id,$order_id,'" . $product_data["product_id"] . "','" . $product_data["product_name"] . "',$price,'" . $product_data["model_id"] . "','" . $product_data["model"] . "',$qty)");
+                    VALUES($invoice_id,$order_id,'" . $product_data["product_id"] . "','" . $product_data["product_name"] . "',$price,'" . $product_data["model_id"] . "','" . $product_data["model"] . "',$qty)");
 
                     $data = [
                         "merchant_id" => $merchant_id,
