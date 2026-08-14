@@ -70,12 +70,14 @@ function loadNewItems() {
     request.onreadystatechange = function () {
         if (request.readyState == 4 && request.status == 200) {
             const jsonObject = JSON.parse(request.response);
+            console.log(jsonObject);
 
             var newItemesBody = document.getElementById("newItemesBody");
             newItemesBody.innerHTML = "";
             var fragment = document.createDocumentFragment();
 
             const models = jsonObject.data.models;
+
 
 
             models.forEach(model => {
