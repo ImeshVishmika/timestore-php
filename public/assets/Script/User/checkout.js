@@ -269,10 +269,8 @@ function paynow() {
     request.onreadystatechange = function () {
         if (request.readyState == 4 && request.status == 200) {
 
-            console.log(request.responseText);
             var jsonObject = JSON.parse(request.responseText);
-         
-
+            
             // Payment completed. It can be a successful failure.
             payhere.onCompleted = function onCompleted() {
                 // Mark order as paid by updating order status
