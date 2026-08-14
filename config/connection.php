@@ -10,11 +10,11 @@ class Database{
     private static function getConfig() {
         if (self::$config === null) {
             self::$config = [
-                'host' => getenv('DB_HOST') ,
-                'user' => getenv('DB_USER') ,
-                'pass' => getenv('DB_PASS') ,
-                'name' => getenv('DB_NAME') ,
-                'port' => getenv('DB_PORT') 
+                'host' => getenv('MYSQLHOST') ,
+                'user' => getenv('MYSQLUSER') ,
+                'pass' => getenv('MYSQL_ROOT_PASSWORD') ,
+                'name' => getenv('MYSQL_DATABASE') ,
+                'port' => getenv('MYSQLPORT') 
             ];
         }
         return self::$config;
