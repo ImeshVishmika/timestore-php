@@ -1,17 +1,17 @@
 FROM php:8.2-apache
 
-# Enable Apache rewrite module
+# PHP extensions required by MySQL
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+# Apache rewrite support for .htaccess
 RUN a2enmod rewrite
 
-# Set document root to /public
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+# Use /public as the web root
+RUN sed -ri 's!/var/www/html!/var/www/html/public!g' \
+    /etc/apache2/sites-available/000-default.conf \
+    /etc/apache2/apache2.conf
 
-# Change Apache document root
-RUN sed -ri \
-    -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/sites-available/000-default.conf
-
-# Allow .htaccess and access to public directory
+# Make sure Apache allows .htaccess
 RUN printf '%s\n' \
     '<Directory /var/www/html/public>' \
     '    AllowOverride All' \
@@ -20,8 +20,6 @@ RUN printf '%s\n' \
     > /etc/apache2/conf-available/public.conf \
     && a2enconf public
 
-# Copy application
 COPY . /var/www/html/
 
-# Railway uses the PORT environment variable
-CMD ["sh", "-c", "sed -i \"s/Listen 80/Listen ${PORT}/\" /etc/apache2/ports.conf && sed -i \"s/:80>/:${PORT}>/\" /etc/apache2/sites-available/000-default.conf && apache2-foreground"]
+CMD ["sh", "-c", "sed -ri \"s/^Listen 80$/Listen ${PORT}/\" /etc/apache2/ports.conf && sed -ri \"s/:80>/:${PORT}>/\" /etc/apache2/sites-available/000-default.conf && apache2-foreground"]
