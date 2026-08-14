@@ -6,6 +6,9 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 # Enable rewrite module
 RUN a2enmod rewrite
 
+# Ensure only one MPM is loaded (fixes "More than one MPM loaded" on Railway)
+RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork
+
 # Update document root to /public
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
