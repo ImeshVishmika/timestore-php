@@ -255,6 +255,7 @@
             </div>
         </div>
     </div>
+    
     </div>
 
     <script src="/assets/Script/bootstrap.bundle.js"></script>

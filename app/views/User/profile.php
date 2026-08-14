@@ -11,12 +11,7 @@
 
 <body class="bg-light">
 
-    <div class="fixed-top">
-        <?php include "header.php";
-        ?>
-    </div>
-
-    <?php
+    <?php include "header.php";
 
     include "connection.php";
     $email = $_SESSION["u"]["email"];
