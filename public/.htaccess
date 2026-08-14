@@ -1,4 +1,4 @@
-<!-- <IfModule mod_rewrite.c>
+<IfModule mod_rewrite.c>
 
     RewriteEngine On
 
@@ -9,4 +9,4 @@
 
     RewriteRule ^ index.php [QSA,L]
 
-</IfModule> -->
+</IfModule>
