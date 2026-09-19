@@ -27,11 +27,9 @@ Demo URL  https://timestore.imeshvishmika.me
 
 # 📖 Project Overview
 
-**TimeStore** is a full-stack **e-commerce web application** built using **PHP** with a custom **MVC architecture**, **Front Controller pattern**, and a **custom routing system**.
+**TimeStore** is a PHP-based e-commerce application built around a custom MVC flow with a front controller and route configuration in `Router.php`. The project uses direct controller-to-model access, server-side validation, session-based auth, and a MySQL schema for product, customer, cart, order, and address data.
 
-The platform allows users to browse products, place orders, and manage their purchase history while providing administrators with tools to manage products, users, orders, and revenue analytics.
-
-The goal of this project is to demonstrate **backend system design, architecture principles, routing systems, middleware security, and real-world application workflows**.
+The application supports storefront browsing, product model management, user accounts, cart and wishlist operations, and admin-side dashboards for product and customer administration. The architecture is intentionally lightweight and code-driven rather than framework-based, which matches the project’s actual implementation and naming patterns.
 
 ---
 
@@ -39,43 +37,43 @@ The goal of this project is to demonstrate **backend system design, architecture
 
 ## 👤 User Features
 
-- Browse product catalog
-- Search and filter products
-- Add items to cart
-- Checkout with **PayHere sandbox payment gateway**
-- View order history
-- View order details
-- Messaging system with administrators
+- Browse the product catalog and product variants
+- Search products by keyword and filter by product model data
+- Add and remove items from the cart
+- Save items in a watchlist
+- View purchase history and user profile details
+- Update personal address information
+- Place orders with the **PayHere sandbox payment gateway**
+- View and exchange messages with administrators
 
 ---
 
 ## 🛠 Admin Features
 
-- Add products
-- Update products
-- Delete products
-- Search and filter products
-- Manage users
-- View sales history
-- View revenue analytics
-- Manage orders
-- Communicate with users via messaging
+- Add and update product entries and model variants
+- Remove products and product records
+- View product revenue and sales statistics
+- Manage users and customer details
+- Review order records and order status
+- Manage brand and category records
+- Review message activity between users and admins
 
 ---
 
 # 🧰 Technology Stack
 
-| Layer | Technology |
+| Layer | Implementation |
 |------|------|
-| Backend | PHP |
-| Architecture | MVC |
-| Router | Custom Router |
-| Security | CSRF + Role Based Auth |
+| Backend | PHP 8.x |
+| Architecture | MVC with a front controller |
+| Routing | Custom route map in `Router.php` |
+| Auth | Session-based role checks via middleware |
+| Data access | Model classes under `app/model` |
 | Database | MySQL |
-| Reverse Proxy | Nginx |
-| Web Server | Apache |
-| Runtime | PHP-FPM |
-| Payment Gateway | PayHere Sandbox |
+| Web server | Apache / PHP-FPM |
+| Reverse proxy | Nginx |
+| Payment | PayHere sandbox |
+| Front-end assets | Plain PHP views and static files under `public/assets` |
 
 ---
 
@@ -87,14 +85,13 @@ flowchart TD
 A[Client Browser]:::client --> B[Nginx Reverse Proxy]:::infra
 B --> C[Apache Web Server]:::infra
 C --> D[PHP-FPM]:::infra
-D --> E[index.php Front Controller]:::app
+D --> E[public/index.php Front Controller]:::app
 
 E --> F[Router]:::app
-F --> G[Middleware Layer]:::security
-G --> H[Controllers]:::app
-H --> I[Services]:::app
-I --> J[Repositories / Models]:::app
-J --> K[(MySQL Database)]:::db
+F --> G[Middleware auth checks]:::security
+G --> H[Web Controllers / API Controllers]:::app
+H --> I[Model classes]:::app
+I --> J[(MySQL Database)]:::db
 
 classDef client fill:#4CAF50,color:#fff
 classDef infra fill:#FF9800,color:#fff
@@ -115,98 +112,194 @@ participant Apache
 participant Router
 participant Middleware
 participant Controller
-participant Service
+participant Model
 participant Database
 
-User->>Nginx: HTTP Request
+User->>Nginx: HTTP request
 Nginx->>Apache: Forward request
-Apache->>Router: index.php
+Apache->>Router: Dispatch through index.php
 
-Router->>Middleware: Authorization check
-Middleware->>Router: Access granted
+Router->>Middleware: Check allowed roles
+Middleware-->>Router: Access granted or denied
 
-Router->>Controller: Dispatch controller
-Controller->>Service: Business logic
-Service->>Database: Query data
-Database-->>Service: Results
-
-Service-->>Controller: Response
-Controller-->>User: JSON / HTML response
+Router->>Controller: Resolve controller and action
+Controller->>Model: Execute query or business logic
+Model->>Database: Read or write data
+Database-->>Model: Result set
+Model-->>Controller: Prepared response
+Controller-->>User: JSON or HTML output
 ```
 ---
 
 # 🗄 Database Design
 
+The application database is modeled to match the current MySQL schema in the project dump. The main entities are brands, products, product variants, users, addresses, carts, watchlists, and purchase history.
+
 ```mermaid
 erDiagram
+    BRAND {
+        int brand_id PK
+        varchar brand_name
+    }
 
-USERS {
-int id
-string name
-string email
-string password
-string role
-}
+    PRODUCT {
+        int product_id PK
+        varchar product_name
+        int sold_count
+        int brand_id FK
+    }
 
-PRODUCTS {
-int id
-string name
-string description
-float price
-int stock
-}
+    GENDER {
+        int id PK
+        varchar gender
+    }
 
-ORDERS {
-int id
-int user_id
-string status
-float total
-}
+    PRODUCT_HAS_MODEL {
+        int model_id PK
+        varchar model
+        double price
+        int qty
+        datetime added_time
+        int gender_id FK
+        int sold_count
+        int product_id FK
+    }
 
-ORDER_ITEMS {
-int id
-int order_id
-int product_id
-int quantity
-}
+    CATEGORY {
+        int category_id PK
+        varchar category_name
+    }
 
-MESSAGES {
-int id
-int sender_id
-int receiver_id
-string message
-datetime created_at
-}
+    PRODUCT_HAS_CATEGORY {
+        int product_id PK,FK
+        int category_category_id PK,FK
+    }
 
-USERS ||--o{ ORDERS : places
-ORDERS ||--o{ ORDER_ITEMS : contains
-PRODUCTS ||--o{ ORDER_ITEMS : includes
-USERS ||--o{ MESSAGES : sends
-USERS ||--o{ MESSAGES : receives
+    PRODUCT_IMG {
+        varchar img_path PK
+        int product_id FK
+    }
+
+    USERS {
+        varchar fname
+        varchar lname
+        varchar password
+        varchar mobile
+        varchar email PK
+        int gender_id FK
+    }
+
+    USER_ADDRESS {
+        varchar address_line1
+        varchar address_line2
+        int city_id FK
+        varchar users_email PK,FK
+    }
+
+    PROVINCES {
+        int province_id PK
+        varchar name_en
+        varchar name_si
+        varchar name_ta
+    }
+
+    DISTRICTS {
+        int district_id PK
+        int province_id FK
+        varchar name_en
+        varchar name_si
+        varchar name_ta
+    }
+
+    CITIES {
+        int city_id PK
+        int district_id FK
+        varchar name_en
+        varchar name_si
+        varchar name_ta
+        varchar postcode
+        double latitude
+        double longitude
+    }
+
+    CART {
+        int cart_id PK
+        int product_id FK
+        int cart_qty
+        varchar users_email FK
+    }
+
+    WATCHLIST {
+        int watchlist_id PK
+        int product_id FK
+        varchar users_email FK
+    }
+
+    RATINGS {
+        varchar user_email PK,FK
+        int product_id PK,FK
+        varchar ratings
+        varchar comment
+    }
+
+    USER_HISTORY {
+        int id PK
+        varchar user_id FK
+        int product_id FK
+        datetime buy_datetime
+        int amount
+    }
+
+    BRAND ||--o{ PRODUCT : contains
+    PRODUCT ||--o{ PRODUCT_HAS_MODEL : has
+    GENDER ||--o{ USERS : defines
+    GENDER ||--o{ PRODUCT_HAS_MODEL : defines
+    PRODUCT_HAS_MODEL ||--o{ PRODUCT_HAS_CATEGORY : mapped_by
+    CATEGORY ||--o{ PRODUCT_HAS_CATEGORY : classified_as
+    PRODUCT_HAS_MODEL ||--o{ PRODUCT_IMG : has
+    USERS ||--o{ CART : owns
+    PRODUCT_HAS_MODEL ||--o{ CART : added_to
+    USERS ||--o{ WATCHLIST : saves
+    PRODUCT_HAS_MODEL ||--o{ WATCHLIST : watched
+    USERS ||--o{ RATINGS : leaves
+    PRODUCT_HAS_MODEL ||--o{ RATINGS : rated
+    USERS ||--o| USER_ADDRESS : has
+    CITIES ||--o{ USER_ADDRESS : contains
+    PROVINCES ||--o{ DISTRICTS : contains
+    DISTRICTS ||--o{ CITIES : contains
+    USERS ||--o{ USER_HISTORY : purchases
+    PRODUCT_HAS_MODEL ||--o{ USER_HISTORY : purchased_as
 ```
+
+Core schema tables:
+
+- `brand`: watch brands such as G-Shock
+- `product`: base product row for each item family
+- `product_has_model`: product variants/models with price, stock, gender, and sold count
+- `category` + `product_has_category`: many-to-many mapping between product models and categories
+- `product_img`: image paths associated with each product model
+- `users`: registered customer accounts
+- `user_address`: customer shipping address linked to a city
+- `provinces`, `districts`, `cities`: Sri Lankan location hierarchy used for addresses
+- `cart`: items currently in a user’s cart
+- `watchlist`: saved products for later viewing
+- `ratings`: product ratings and comments left by users
+- `user_history`: product purchase history for each user
 
 ---
 
 # 🔐 Security
 
-TimeStore includes several security mechanisms.
+The project applies security checks at the routing layer before reaching controller logic. Route definitions in `Router.php` can specify required roles such as `admin` or `user`, and the auth middleware validates that session state before dispatch.
 
-Authentication
+Current implementation details:
 
-Session-based authentication.
+- Session-based authentication using the auth middleware
+- Role-based route restrictions through `allows` entries
+- Controller access controlled before action execution
+- Payment flows and sensitive endpoints restricted by role checks
 
-Role-Based Authorization
-
-Routes can define required roles.
-
-Example:
-
-"allows" => ["admin"]
-CSRF Protection
-hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
-Middleware Layer
-
-Security checks are performed before controller execution.
+This is a lightweight backend security model rather than a full framework middleware stack, which matches the project’s actual implementation.
 
 ---
 
@@ -214,30 +307,59 @@ Security checks are performed before controller execution.
 
 ```text
 timestore/
-├── public/
-│   ├── index.php
-│   └── .htaccess
 ├── app/
 │   ├── controllers/
-│   │   ├── ProductController.php
-│   │   ├── OrderController.php
-│   │   └── UserController.php
-│   ├── services/
-│   │   ├── ProductService.php
-│   │   └── OrderService.php
-│   ├── models/
-│   │   ├── ProductModel.php
-│   │   ├── OrderModel.php
-│   │   └── UserModel.php
+│   │   ├── Api/
+│   │   │   ├── BrandController.php
+│   │   │   ├── CartController.php
+│   │   │   ├── DeliveryMethodController.php
+│   │   │   ├── HistoryController.php
+│   │   │   ├── MessageController.php
+│   │   │   ├── OrderController.php
+│   │   │   ├── ProductController.php
+│   │   │   ├── SearchController.php
+│   │   │   ├── UserController.php
+│   │   │   └── WishlistController.php
+│   │   └── Web/
+│   │       ├── AdminPageController.php
+│   │       ├── ImgController.php
+│   │       └── UserPageController.php
+│   ├── core/
+│   │   ├── Router.php
+│   │   └── Validator.php
 │   ├── middleware/
-│   │   ├── AuthMiddleware.php
-│   │   └── CsrfMiddleware.php
-│   ├── router/
-│   │   └── Router.php
+│   │   └── auth.php
+│   ├── model/
+│   │   ├── admin.php
+│   │   ├── brand.php
+│   │   ├── cart.php
+│   │   ├── customers.php
+│   │   ├── delivery.php
+│   │   ├── history.php
+│   │   ├── Img.php
+│   │   ├── messages.php
+│   │   ├── orders.php
+│   │   ├── product.php
+│   │   ├── search.php
+│   │   └── wishlist.php
 │   └── views/
+│       ├── Admin/
+│       └── User/
 ├── config/
-├── database/
-└── docs/
-    ├── images/
-    └── banner.png
+│   ├── connection.php
+│   └── payhere.php
+├── public/
+│   ├── index.php
+│   ├── loadImg.php
+│   └── assets/
+│       ├── Script/
+│       └── style/
+├── media/
+│   ├── icons/
+│   ├── poster/
+│   ├── product/
+│   └── userprofile/
+├── README.md
+├── SECURITY_AUDIT_REPORT.md
+└── Dockerfile
 ```
