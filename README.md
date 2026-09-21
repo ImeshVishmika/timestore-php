@@ -133,10 +133,17 @@ Controller-->>User: JSON or HTML output
 
 # 🗄 Database Design
 
-The application database is modeled to match the current MySQL schema in the project dump. The main entities are brands, products, product variants, users, addresses, carts, watchlists, and purchase history.
+The database design below reflects the current MySQL schema in `doc/timestore.sql`. It contains 29 base tables and four read-only views: `invoice_data`, `model_data`, `order_data`, and `user_address_data`.
 
 ```mermaid
 erDiagram
+    ADMIN {
+        varchar email PK
+        varchar password
+        varchar first_name
+        varchar last_name
+    }
+
     BRAND {
         int brand_id PK
         varchar brand_name
@@ -145,13 +152,7 @@ erDiagram
     PRODUCT {
         int product_id PK
         varchar product_name
-        int sold_count
         int brand_id FK
-    }
-
-    GENDER {
-        int id PK
-        varchar gender
     }
 
     PRODUCT_HAS_MODEL {
@@ -160,9 +161,21 @@ erDiagram
         double price
         int qty
         datetime added_time
-        int gender_id FK
-        int sold_count
         int product_id FK
+    }
+
+    GENDER {
+        int id PK
+        varchar gender
+    }
+
+    MODEL {
+        int model_id PK
+        datetime added_time
+        varchar model
+        double price
+        int product_id FK
+        int qty
     }
 
     CATEGORY {
@@ -173,11 +186,12 @@ erDiagram
     PRODUCT_HAS_CATEGORY {
         int product_id PK,FK
         int category_category_id PK,FK
+        int category_id
     }
 
     PRODUCT_IMG {
         varchar img_path PK
-        int product_id FK
+        int model_id FK
     }
 
     USERS {
@@ -187,12 +201,14 @@ erDiagram
         varchar mobile
         varchar email PK
         int gender_id FK
+        int status FK
+        date joined_date
     }
 
     USER_ADDRESS {
         varchar address_line1
         varchar address_line2
-        int city_id FK
+        int address_city_id FK
         varchar users_email PK,FK
     }
 
@@ -206,17 +222,20 @@ erDiagram
     DISTRICTS {
         int district_id PK
         int province_id FK
-        varchar name_en
-        varchar name_si
-        varchar name_ta
+        varchar district_en
+        varchar district_si
+        varchar district_ta
     }
 
     CITIES {
         int city_id PK
         int district_id FK
-        varchar name_en
-        varchar name_si
-        varchar name_ta
+        varchar city_en
+        varchar city_si
+        varchar city_ta
+        varchar sub_name_en
+        varchar sub_name_si
+        varchar sub_name_ta
         varchar postcode
         double latitude
         double longitude
@@ -227,6 +246,12 @@ erDiagram
         int product_id FK
         int cart_qty
         varchar users_email FK
+    }
+
+    BUY_NOW_CART {
+        varchar user_email FK
+        int model_id FK
+        int qty
     }
 
     WATCHLIST {
@@ -250,15 +275,88 @@ erDiagram
         int amount
     }
 
+    DELIVERY_METHOD {
+        int id PK
+        varchar delivery_method
+        double price
+        varchar delivery_days
+    }
+
+    ORDER {
+        int order_id PK
+        varchar email FK
+        datetime ordered_date
+        int delivery_method FK
+        int order_status FK
+    }
+
+    ORDER_HAS_MODEL {
+        int order_id PK,FK
+        int model_id PK,FK
+        int qty
+    }
+
+    ORDER_STATUS {
+        int order_status_id PK
+        varchar status
+    }
+
+    INVOICE {
+        int invoice_id PK
+        int order_id
+        datetime invoice_date
+        varchar email FK
+        double delivery_fee
+    }
+
+    INVOICE_ITEMS {
+        int invoice_item_id PK
+        int order_id FK
+        int product_id
+        varchar product_name
+        double product_price
+        int qty
+        int invoice_id FK
+        varchar model_name
+        double model_price
+        int model_id FK
+    }
+
+    MESSAGES {
+        int message_id PK
+        int status
+        text message
+        varchar sender FK
+        text subject
+        timestamp date_time
+    }
+
+    MSG_STATUS {
+        int msg_status_id PK
+        varchar msg_status
+    }
+
+    USER_IMG {
+        varchar email PK,FK
+        text path
+    }
+
+    USER_STATUS {
+        int status_id PK
+        varchar status
+    }
+
     BRAND ||--o{ PRODUCT : contains
     PRODUCT ||--o{ PRODUCT_HAS_MODEL : has
-    GENDER ||--o{ USERS : defines
-    GENDER ||--o{ PRODUCT_HAS_MODEL : defines
-    PRODUCT_HAS_MODEL ||--o{ PRODUCT_HAS_CATEGORY : mapped_by
-    CATEGORY ||--o{ PRODUCT_HAS_CATEGORY : classified_as
+    PRODUCT ||--o{ MODEL : legacy_model
+    PRODUCT_HAS_MODEL ||--o{ PRODUCT_HAS_CATEGORY : classified_by
+    CATEGORY ||--o{ PRODUCT_HAS_CATEGORY : includes
     PRODUCT_HAS_MODEL ||--o{ PRODUCT_IMG : has
+    GENDER ||--o{ USERS : defines
     USERS ||--o{ CART : owns
     PRODUCT_HAS_MODEL ||--o{ CART : added_to
+    USERS ||--o{ BUY_NOW_CART : buys_now
+    PRODUCT_HAS_MODEL ||--o{ BUY_NOW_CART : selected
     USERS ||--o{ WATCHLIST : saves
     PRODUCT_HAS_MODEL ||--o{ WATCHLIST : watched
     USERS ||--o{ RATINGS : leaves
@@ -269,22 +367,30 @@ erDiagram
     DISTRICTS ||--o{ CITIES : contains
     USERS ||--o{ USER_HISTORY : purchases
     PRODUCT_HAS_MODEL ||--o{ USER_HISTORY : purchased_as
+    USERS ||--o{ ORDER : places
+    DELIVERY_METHOD ||--o{ ORDER : uses
+    ORDER_STATUS ||--o{ ORDER : tracks
+    ORDER ||--o{ ORDER_HAS_MODEL : contains
+    PRODUCT_HAS_MODEL ||--o{ ORDER_HAS_MODEL : ordered
+    USERS ||--o{ INVOICE : billed
+    ORDER ||--o{ INVOICE_ITEMS : referenced_by
+    INVOICE ||--o{ INVOICE_ITEMS : contains
+    PRODUCT_HAS_MODEL ||--o{ INVOICE_ITEMS : invoiced
+    USERS ||--o{ MESSAGES : sends
+    USERS ||--o| USER_IMG : has
+    USER_STATUS ||--o{ USERS : controls
 ```
 
 Core schema tables:
 
-- `brand`: watch brands such as G-Shock
-- `product`: base product row for each item family
-- `product_has_model`: product variants/models with price, stock, gender, and sold count
-- `category` + `product_has_category`: many-to-many mapping between product models and categories
-- `product_img`: image paths associated with each product model
-- `users`: registered customer accounts
-- `user_address`: customer shipping address linked to a city
-- `provinces`, `districts`, `cities`: Sri Lankan location hierarchy used for addresses
-- `cart`: items currently in a user’s cart
-- `watchlist`: saved products for later viewing
-- `ratings`: product ratings and comments left by users
-- `user_history`: product purchase history for each user
+- Catalog: `brand`, `product`, `product_has_model`, `product_img`, `category`, `product_has_category`, and the legacy `model` table
+- Accounts: `admin`, `users`, `gender`, `user_status`, `user_img`, and `user_address`
+- Locations: `provinces`, `districts`, and `cities`
+- Shopping: `cart`, `buy_now_cart`, `watchlist`, and `ratings`
+- Orders: `order`, `order_has_model`, `order_status`, `delivery_method`, `invoice`, and `invoice_items`
+- Communication and history: `messages`, `msg_status`, and `user_history`
+
+The schema declares foreign keys for the relationships shown in the diagram. `invoice.order_id` is associated with `order.order_id` by the application but is not declared as a foreign key in the dump. Likewise, `messages.status` is not linked to `msg_status`, and `invoice_items.product_id` is a stored product value without a declared foreign key.
 
 ---
 
