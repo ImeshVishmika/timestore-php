@@ -29,15 +29,15 @@
 
 ## Admin Panel
 
-![Admin Dashboard](doc/images/admin/AdminDashboard.png)
-![Customers](doc/images/admin/customers.png)
-![Orders](doc/images/admin/orders.png)
+[![Admin Dashboard](doc/images/admin/AdminDashboard.png)](doc/images/admin/AdminDashboard.png)
+[![Customers](doc/images/admin/customers.png)](doc/images/admin/customers.png)
+[![Orders](doc/images/admin/orders.png)](doc/images/admin/orders.png)
 
 ## Storefront
 
-![Home Page](doc/images/user/Home.png)
-![Product Page](doc/images/user/ProductPage.png)
-![Checkout Page](doc/images/user/checkoutPage.png)
+[![Home Page](doc/images/user/Home.png)](doc/images/user/Home.png)
+[![Product Page](doc/images/user/ProductPage.png)](doc/images/user/ProductPage.png)
+[![Checkout Page](doc/images/user/checkoutPage.png)](doc/images/user/checkoutPage.png)
 
 ---
 
