@@ -18,10 +18,26 @@
 
 ---
 
-# 🌐 Live Demo
+# 🔗 Project Links
 
-Demo URL  https://timestore.imeshvishmika.me
+- GitHub Repository: https://github.com/ImeshVishmika/timestore-php
+- Live Demo: https://timestore.imeshvishmika.me
 
+---
+
+# 📸 Screenshots
+
+## Admin Panel
+
+![Admin Dashboard](doc/images/admin/AdminDashboard.png)
+![Customers](doc/images/admin/customers.png)
+![Orders](doc/images/admin/orders.png)
+
+## Storefront
+
+![Home Page](doc/images/user/Home.png)
+![Product Page](doc/images/user/ProductPage.png)
+![Checkout Page](doc/images/user/checkoutPage.png)
 
 ---
 
