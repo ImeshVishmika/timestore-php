@@ -293,13 +293,16 @@ Core schema tables:
 The project applies security checks at the routing layer before reaching controller logic. Route definitions in `Router.php` can specify required roles such as `admin` or `user`, and the auth middleware validates that session state before dispatch.
 
 Current implementation details:
+## Security
 
-- Session-based authentication using the auth middleware
-- Role-based route restrictions through `allows` entries
-- Controller access controlled before action execution
-- Payment flows and sensitive endpoints restricted by role checks
+### Authentication
+Session-based authentication.
 
-This is a lightweight backend security model rather than a full framework middleware stack, which matches the project’s actual implementation.
+### Authorization
+Role-based middleware protects administrative routes.
+
+### CSRF
+State-changing requests require a CSRF token.
 
 ---
 
