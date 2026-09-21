@@ -32,12 +32,20 @@
 [![Admin Dashboard](doc/images/admin/AdminDashboard.png)](doc/images/admin/AdminDashboard.png)
 [![Customers](doc/images/admin/customers.png)](doc/images/admin/customers.png)
 [![Orders](doc/images/admin/orders.png)](doc/images/admin/orders.png)
+[![Products](doc/images/admin/products.png)](doc/images/admin/products.png)
+[![Messages](doc/images/admin/messages.png)](doc/images/admin/messages.png)
+[![Settings](doc/images/admin/settings.png)](doc/images/admin/settings.png)
 
 ## Storefront
 
 [![Home Page](doc/images/user/Home.png)](doc/images/user/Home.png)
+[![Search Page](doc/images/user/searchPage.png)](doc/images/user/searchPage.png)
 [![Product Page](doc/images/user/ProductPage.png)](doc/images/user/ProductPage.png)
+[![](doc/images/user/ProductBuyWindow.png)](doc/images/user/ProductBuyWindow.png)
 [![Checkout Page](doc/images/user/checkoutPage.png)](doc/images/user/checkoutPage.png)
+[![](doc/images/user/checkoutPayhereWindow.png)](doc/images/user/checkoutPayhereWindow.png)
+[![](doc/images/user/Payheredetails.png)](doc/images/user/Payheredetails.png)
+[![](doc/images/user/PaymentSuccessWindow.png)](doc/images/user/PaymentSuccessWindow.png)
 
 ---
 
